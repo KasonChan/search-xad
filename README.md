@@ -1,9 +1,8 @@
 # Search xAd (Under construction)#
 
-A program in Scala that spawns 10 workers, where each worker simultaneously 
-searches a source of random data for the string 'xAd', then informs the parent 
-via some form of inter-process communication or shared data structure the 
-following data fields:
+A program written in Scala that spawns 10 workers, where each worker 
+simultaneously searches a source of random data for the string 'xAd', then 
+informs the parent the following data fields:
 - elapsed time
 - count of bytes read
 - status
