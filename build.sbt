@@ -9,3 +9,5 @@ libraryDependencies ++= Seq(
   "com.typesafe.akka" %% "akka-testkit" % "2.3.4",
   "org.scalatest" %% "scalatest" % "2.1.6" % "test"
 )
+
+scalacOptions in ThisBuild ++= Seq("-feature")
