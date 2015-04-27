@@ -1,17 +1,18 @@
 package actors
 
-import java.io.{IOException, FileInputStream}
+import java.io.{FileNotFoundException, FileReader, IOException}
+import java.util.Scanner
 
 /**
  * Created by kasonchan on 4/25/15.
  */
-case class Search(s: String)
+case class Search(source: String, search: String)
 
 case class Status(s: String)
 
-case class Elapsed(t: Long*)
+case class Elapsed(t: Option[Long])
 
-case class ByteCount(b: Long*)
+case class ByteCount(b: Option[Long])
 
 case class PartialResult(worker: String, elapsedTime: Elapsed, byteCount: ByteCount)
 
@@ -19,24 +20,34 @@ case class Result(worker: String, elapsedTime: Elapsed, byteCount: ByteCount, st
 
 trait Function {
 
-  def read(source: String): Option[Int] = {
+  def read(source: String, search: String): Option[Long] = {
 
-    val reader = scala.io.Source.fromFile(source)
+    var found: Boolean = false
+    var totalBytes = 0
+    var index: Int = -1
 
-//    for (line <- reader.getLines()) {
-//
-//      if (line.contains("xAd")) {
-//        println(line.size)
-//      }
-//    }
+    val scanner: Scanner = new Scanner(new FileReader(source))
 
-    val byteArray = reader.map(_.toByte).mkString
+    try {
+      while (scanner.hasNextLine() && !found) {
+        totalBytes = totalBytes + scanner.nextLine().length
+        index = scanner.nextLine().indexOf(search)
+        found = index >= 0
+      }
+    }
+    catch {
+      case e: IOException => System.err.println(e.printStackTrace())
+      case e: FileNotFoundException => System.err.println(e.printStackTrace())
+      case e: Exception => System.err.println(e.printStackTrace())
+    }
+    finally {
+      scanner.close()
+    }
 
-    println(byteArray)
-
-    reader.close()
-
-    Some(5)
+    found match {
+      case true => Some(totalBytes)
+      case false => None
+    }
   }
 
 }

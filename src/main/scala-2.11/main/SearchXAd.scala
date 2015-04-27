@@ -1,7 +1,7 @@
 package main
 
 import actors.{Search, Supervisor}
-import akka.actor.{ActorRef, ActorSystem, Props}
+import akka.actor.{ActorRef, ActorSystem}
 import util.{Util, ValidArguments}
 
 /**
@@ -11,23 +11,32 @@ object SearchXAd extends Util {
 
   def main(args: Array[String]) {
 
+    //    Call function isValidArguments to validate command line arguments
     isValidArguments(args) match {
-      case Some(ValidArguments(source)) => println(source)
-      case Some(ValidArguments(source, time)) => println(source + " " + time)
+      case Some(ValidArguments(source, None)) => executeSearch(source, None)
+      case Some(ValidArguments(source, to@Some(timeout))) => executeSearch(source, to)
       case None => System.err.println("Invalid input arguments")
     }
 
   }
 
-  def executeSearch(source: String, time: Long*) = {
-    //    Create a actor system
+  def executeSearch(source: String, timeoutOption: Option[Long]) = {
+
+    // Create a actor system
     val system: ActorSystem = ActorSystem("System")
 
-    val supervisor: ActorRef = system.actorOf(Props[Supervisor], "supervisor")
+    val search: String = "xAd"
 
-    println(source)
+    // The default timeout will be set to 60 to the Supervisor if there is no
+    // timeout input argument
+    val defaultTimeout: Int = 60
 
-    supervisor ! Search(source)
+    val supervisor: ActorRef =
+      system.actorOf(Supervisor.props(timeoutOption.getOrElse(defaultTimeout)),
+        "Supervisor")
+
+    //    Send the search message to supervisor
+    supervisor ! Search(source, search)
 
     system.shutdown()
     system.awaitTermination()

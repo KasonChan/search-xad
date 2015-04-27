@@ -8,30 +8,30 @@ import akka.actor.{Actor, ActorLogging}
 class Worker extends Actor with ActorLogging with Function {
 
   def receive: PartialFunction[Any, Unit] = {
-    case Search(source: String) => {
+
+    case Search(source: String, search: String) => {
       log.info(source)
 
       val initialTime: Long = System.currentTimeMillis
 
-      //      Read from source from source
-      val byteCount = read(source)
+      //      Search the string from source
+      val byteCount = read(source, search)
 
       val elapsedTime: Long = System.currentTimeMillis - initialTime
 
-      log.info(elapsedTime.toString)
-
-      println(byteCount.getOrElse(-1))
+      log.debug("Time elapsed: " + elapsedTime.toString + " ms")
 
       val partialResult = PartialResult(self.path.name,
-        Elapsed(elapsedTime),
-        ByteCount(4))
-
+        Elapsed(Some(elapsedTime)),
+        ByteCount(byteCount))
       log.info(partialResult.toString)
-
-      sender() ! partialResult
     }
-    case t: Throwable => log.error(t.getCause, t.getMessage)
-    case _ => log.info("???")
+    case t: Throwable => {
+      log.error(t.getCause, t.getMessage)
+    }
+    case _ => {
+      log.info("???")
+    }
   }
 
 }

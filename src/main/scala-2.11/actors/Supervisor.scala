@@ -1,40 +1,44 @@
 package actors
 
 import akka.actor.{Actor, ActorLogging, Props}
-import akka.pattern.ask
-import akka.util.Timeout
-
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
-import scala.concurrent.duration._
+import akka.routing.{ActorRefRoutee, BroadcastRoutingLogic, Router}
 
 /**
  * Created by kasonchan on 4/24/15.
  */
-class Supervisor extends Actor with ActorLogging with Function {
+object Supervisor {
+  def props(to: Long): Props = Props(new Supervisor(to))
+}
 
-  val worker1 = context.actorOf(Props[Worker])
-  context watch worker1
+class Supervisor(val to: Long) extends Actor with ActorLogging with Function {
+
+  var router: Router = {
+
+    val routees: Vector[ActorRefRoutee] = Vector.fill(1) {
+      val r = context.actorOf(Props[Worker])
+      context watch r
+      ActorRefRoutee(r)
+    }
+
+    Router(BroadcastRoutingLogic(), routees)
+  }
 
   def receive: PartialFunction[Any, Unit] = {
+
     case s: Search => {
-      implicit val timeout = Timeout(60 milliseconds)
-      val worker1Result: Future[Result] = ask(worker1, s).mapTo[Result]
-
-      worker1Result.onSuccess {
-        case r: Result => log.info(r.toString)
-      }
-
-      worker1Result.onFailure {
-        case e: Exception => log.error(e.getMessage)
-      }
-
+      log.info(s.toString)
+      router.route(s, self)
     }
     case pr: PartialResult => {
+      //      TODO: Finish up partial result and ranking
       log.info(pr.toString)
     }
-    case t: Throwable => log.error(t.getCause, t.getMessage)
-    case _ => log.info("???")
+    case t: Throwable => {
+      log.error(t.getCause, t.getMessage)
+    }
+    case _ => {
+      log.info("???")
+    }
   }
 
 }
