@@ -11,7 +11,7 @@ object SearchXAd extends Util {
 
   def main(args: Array[String]) {
 
-    //    Call function isValidArguments to validate command line arguments
+    // Call function isValidArguments to validate command line arguments
     isValidArguments(args) match {
       case Some(ValidArguments(source, None)) => executeSearch(source, None)
       case Some(ValidArguments(source, to@Some(timeout))) => executeSearch(source, to)
@@ -22,23 +22,24 @@ object SearchXAd extends Util {
 
   def executeSearch(source: String, timeoutOption: Option[Long]) = {
 
-    // Create a actor system
-    val system: ActorSystem = ActorSystem("System")
+    // Create a actor system called system
+    val system: ActorSystem = ActorSystem("system")
 
     val search: String = "xAd"
 
-    // The default timeout will be set to 60 to the Supervisor if there is no
-    // timeout input argument
+    // The default timeout will be set to 60 to the supervisor if there is no
+    // timeout input command-line argument
     val defaultTimeout: Int = 60
 
-    val supervisor: ActorRef =
-      system.actorOf(Supervisor.props(timeoutOption.getOrElse(defaultTimeout)),
-        "Supervisor")
+    val timeout: Long = timeoutOption.getOrElse(defaultTimeout)
 
-    //    Send the search message to supervisor
+    val supervisor: ActorRef =
+      system.actorOf(Supervisor.props(timeout), "supervisor")
+
+    // Send the search message to supervisor
     supervisor ! Search(source, search)
 
-    system.shutdown()
+    // Wait for the system to shutdown
     system.awaitTermination()
   }
 

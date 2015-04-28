@@ -1,4 +1,4 @@
-# Search xAd (Under construction)#
+# Search xAd #
 
 A program written in Scala that spawns 10 workers, where each worker 
 simultaneously searches a source of random data for the string 'xAd', then 
@@ -14,7 +14,7 @@ writes a report to stdout for each worker sorted in descending order by
 - `<elapsed>:`
 - `<elapsed> <byte_cnt> <status>`
 
-Where `<elapsed>` is the elapsed time for that worker in ms, `<byte_cnt>` is 
+Where `<elapsed>` is the elapsed time for that worker in `ms`, `<byte_cnt>` is 
 the number of random bytes read to find the target string and `<status>` should 
 be one of {`SUCCESS`, `TIMEOUT`, `FAILURE`}. `FAILURE` should be reported for 
 any error/exception of the worker and the specific error messages should go to 
@@ -40,7 +40,17 @@ instructions if necessary.
 
 This application is written in Scala with SBT and Akka, using IntelliJ.
 
+### Assumptions ###
+
+[Scala](http://www.scala-lang.org/download/) and [SBT](http://www.scala-sbt.org/download.html)
+are installed in your machine.
+
 ### Running the code ###
 
-1. Download this repository
-3. Enter `sbt run` to run the code.
+1. Download/Unzip this repository.
+2. Enter `sbt compile` to compile.
+3. Enter one of the following to execute:
+  - `sbt "run <source>"`
+  - `sbt "run -h <timeout> <source>"` 
+  - `sbt "run <source> -h <timeout>"`
+4. Enter `sbt clean` to clean up the built files.
